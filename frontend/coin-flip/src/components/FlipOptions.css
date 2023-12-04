@@ -1,0 +1,30 @@
+.coin-flip-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    background-color: #706db7;
+}
+  
+.input-container {
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 5px;
+    width: 200px; 
+    box-sizing: border-box;
+}
+
+.choice-button-container {
+    display: flex;
+    gap: 5px;
+    
+}
+
+.toss-button-container {
+    display: flex;
+    gap: 100px;
+}
+
+
+
