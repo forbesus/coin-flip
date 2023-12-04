@@ -11,8 +11,17 @@ import {
   Address,
   nativeToScVal,
   xdr,
+  SorobanRpc,
 } from "soroban-client";
 
+export const SendTxStatus: {
+  [index: string]: SorobanRpc.SendTransactionStatus;
+} = {
+  Pending: "PENDING",
+  Duplicate: "DUPLICATE",
+  Retry: "TRY_AGAIN_LATER",
+  Error: "ERROR",
+};
 export const accountToScVal = (account: string) =>
   new Address(account).toScVal();
 
@@ -21,9 +30,9 @@ export const numberToI128 = (value: number): xdr.ScVal =>
 
 function FlipOptions() {
   const [amount, setAmount] = useState(0);
-  const [selectedOption, setSelectedOption] = useState(null);
+  const [selectedOption, setSelectedOption] = useState("");
 
-  const handleOptionClicked = (option) => {
+  const handleOptionClicked = (option: React.SetStateAction<string>) => {
     setSelectedOption(option);
     console.log(option + " Clicked");
   };
@@ -46,9 +55,7 @@ function FlipOptions() {
     if (selectedOption) {
       console.log("here");
       signTransaction;
-      const sourceKeypair = Keypair.fromSecret(
-        "SB46364SGIGPEQOLRXL6RTVDP4X2HBIMSNPIG246GAQC7VHHGHBOEV4M"
-      );
+      
       const server = new Server("https://soroban-testnet.stellar.org", {
         allowHttp: true,
       });
@@ -57,7 +64,7 @@ function FlipOptions() {
       const contract = new Contract(contractAddress);
 
       console.log("account ok");
-      const sourceAccount = await server.getAccount(sourceKeypair.publicKey());
+      const sourceAccount = await server.getAccount(caller);
       console.log("source ok");
       let builtTransaction = new TransactionBuilder(sourceAccount, {
         fee: BASE_FEE,
@@ -76,7 +83,34 @@ function FlipOptions() {
       let preparedTransaction = builtTransaction.toXDR();
       try {
         const signedTx = await signTransaction(preparedTransaction);
-        console.group(signedTx);
+        const tx = TransactionBuilder.fromXDR(signedTx, Networks.TESTNET);
+        const sendResponse = await server.sendTransaction(tx);
+        if (sendResponse.errorResult) {
+          throw new Error("Unable to submit transaction");
+        }
+      
+        if (sendResponse.status === SendTxStatus.Pending) {
+          let txResponse = await server.getTransaction(sendResponse.hash);
+      
+          // Poll this until the status is not "NOT_FOUND"
+          while (txResponse.status === SorobanRpc.GetTransactionStatus.NOT_FOUND) {
+            // See if the transaction is complete
+            // eslint-disable-next-line no-await-in-loop
+            txResponse = await server.getTransaction(sendResponse.hash);
+            // Wait a second
+            // eslint-disable-next-line no-await-in-loop
+            await new Promise((resolve) => setTimeout(resolve, 1000));
+          }
+      
+          if (txResponse.status === SorobanRpc.GetTransactionStatus.SUCCESS) {
+            return txResponse.resultXdr.toXDR("base64");
+          }
+          // eslint-disable-next-line no-else-return
+        }
+        throw new Error(
+          `Unabled to submit transaction, status: ${sendResponse.status}`,
+        );
+        console.log(sendResponse)
         console.log("prapare ok");
       } catch (error) {
         console.log(error);
@@ -134,7 +168,7 @@ function FlipOptions() {
     }
   }
 
-  const handleAmountChange = (e) => {
+  const handleAmountChange = (e: { target: { value: any; }; }) => {
     const inputAmount = e.target.value;
     if (
       inputAmount === 0 ||
