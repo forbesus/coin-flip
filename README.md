@@ -88,8 +88,21 @@ The XLM token contract address in Soroban is `CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF
     set_native_coin \
     --address CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC 
    ```
-
-3. Call flip function
+3. Add XLM token to your contract
+   <br> The contract needs to hold double the amount of the flip. So we need to transfer some XLM to the contract depending upon the maximum limit a player can bet.
+   ```shell
+   soroban contract invoke \
+    --id CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC \
+    --source alice \
+    --network testnet \
+    -- \
+    transfer \
+    --from alice \
+    --to your_contract_id \
+    --amount 1000000000 
+   ```
+   
+4. Call flip function
    <br> This is a function to flip a coin. Enter the amount and flip choice to flip a coin. The amount showld be given with 7 decimals as XLM is a 7 decimal token. If you want to flip 5 XLM then it will be 50000000.
    <br> Required arguments: <u>Ledger amount</u>.
    ```shell
