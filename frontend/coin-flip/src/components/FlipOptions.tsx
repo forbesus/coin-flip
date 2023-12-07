@@ -110,7 +110,7 @@ function FlipOptions() {
             console.log(txResponse);
             
             // check return value from contract and show result in app
-            let result = txResponse.returnValue['_value'];
+            let result = (txResponse.returnValue as any)['_value'];
             console.log(result)
             setCoinFlipResult(`Star-crossed! You lost ${amount} XLM.` )
             if (result == true) {
