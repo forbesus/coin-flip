@@ -77,7 +77,7 @@ The XLM token contract address in Soroban is `CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF
     initialize \
     --admin alice 
    ```
-2. Set stable coin address
+2. Set native coin address
    <br> Set the XLM contact address.
    ```shell
    soroban contract invoke \
@@ -122,7 +122,7 @@ Now if you win the toss you will receive the double the amount you flipped and i
 ```sh
    npm run dev
    ```
-You will seet the localhost where the app will run.
+You will see the localhost where the app will run.
 
 ### 5. Click on **Connect Wallet** botton in the app.
 
