@@ -26,5 +26,14 @@
     gap: 100px;
 }
 
+.toss-result {
+    position: absolute;
+    top: 100px; 
+    right: 30px;
+    background-color: #40a769;
+    padding: 5px;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(48, 133, 157, 0.2);
+  }
 
 

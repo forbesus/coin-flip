@@ -40,6 +40,7 @@ function FlipOptions() {
   const [amount, setAmount] = useState(0);
   const [selectedOption, setSelectedOption] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [coinFlipResult, setCoinFlipResult] = useState("");
 
   async function handleTossClick() {
     let caller = await getPublicKey();
@@ -50,7 +51,7 @@ function FlipOptions() {
         allowHttp: true,
       });
       const contractAddress =
-        "CA73OANOSHMGM3TJLXW3LSRQP7NY7HIELI57XELGJSXY4OI6UYKX5ONT";
+        "CAMQ6NEYZO4TBP2T5G6MD7Y3NR2XUAE55NJXQ573TB5LGP6WANRC3WUT";
       const contract = new Contract(contractAddress);
 
       const sourceAccount = await server.getAccount(caller);
@@ -107,6 +108,17 @@ function FlipOptions() {
 
           if (txResponse.status === SorobanRpc.GetTransactionStatus.SUCCESS) {
             console.log(txResponse);
+            
+            // check return value from contract and show result in app
+            let result = txResponse.returnValue['_value'];
+            console.log(result)
+            setCoinFlipResult(`Star-crossed! You lost ${amount} XLM.` )
+            if (result == true) {
+              setCoinFlipResult(`Thrilled! You won ${amount * 2} XLM.` )
+            }
+            setTimeout(() => {
+              setCoinFlipResult('');
+            }, 5000);
             return txResponse.resultXdr.toXDR("base64");
           }
           // eslint-disable-next-line no-else-return
@@ -118,11 +130,17 @@ function FlipOptions() {
         // Catch and report any errors we've thrown
         console.log("Sending transaction failed");
         console.log(JSON.stringify(err));
-        setErrorMessage(`Transaction failed. ${JSON.stringify(err)}`);
+        setErrorMessage(`Transaction failed. Please try again ! ${JSON.stringify(err)} `);
+        setTimeout(() => {
+          setErrorMessage('');
+        }, 4000);
       }
     } else {
       console.error("Please select either Heads or Tails.");
       setErrorMessage(`Please select either Head or Tail.`);
+      setTimeout(() => {
+        setErrorMessage('');
+      }, 4000);
     }
   }
 
@@ -191,6 +209,7 @@ function FlipOptions() {
             Toss
           </button>
         </div>
+        {coinFlipResult && <div className="toss-result">{coinFlipResult}</div>}
       </div>
     </>
   );
