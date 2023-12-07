@@ -32,7 +32,7 @@ impl CoinFlip {
         env.storage().instance().set(&key, &address)
     }
 
-    pub fn flip(env:Env, sender:Address, flip_choice:String, amount:i128) -> (String, String, bool) {
+    pub fn flip(env:Env, sender:Address, flip_choice:String, amount:i128) ->  bool {
         sender.require_auth();
 
         let contract_balance = Self::get_balance_of_contract(env.clone());
@@ -62,15 +62,15 @@ impl CoinFlip {
         if result == flip_choice {
             native_coin_client.transfer(&env.current_contract_address(), &sender, &(2 * amount));
             win_status = true;
-            env.events().publish((sender.clone(), flip_choice.clone()), "You Won");
+            env.events().publish((sender.clone(), flip_choice.clone(), amount), "You Won");
         } else {
-            env.events().publish((sender, flip_choice.clone()), "You Lost");
+            env.events().publish((sender, flip_choice.clone(), amount), "You Lost");
         }
 
         // increase flip counter 
         env.storage().instance().set(&flip_key, &(flip_count + 1));
-        
-        (flip_choice, result, win_status)
+
+        win_status
     }
 
     pub fn get_native_coin(env:Env) -> Address {
