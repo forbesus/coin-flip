@@ -11,7 +11,6 @@ pub enum DataKeys{
     NativeCoinAddress,
     ContractBalance,
     FlipCount,
-    CoinFlipResult(Address)
 }
 
 #[contractimpl]
