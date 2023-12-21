@@ -49,11 +49,11 @@ impl CoinFlip {
 
         let value = vec![
             &env, 
-            String::from_slice(&env, "tail"),
-            String::from_slice(&env, "head"),
+            String::from_str(&env, "tail"),
+            String::from_str(&env, "head"),
              ];
 
-        let random_side = value.shuffle();
+        let random_side = value.to_shuffled();
 
         let result = random_side.first_unchecked();
         let mut win_status = false;
