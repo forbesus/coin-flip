@@ -51,7 +51,7 @@ function FlipOptions() {
         allowHttp: true,
       });
       const contractAddress =
-        "CAMQ6NEYZO4TBP2T5G6MD7Y3NR2XUAE55NJXQ573TB5LGP6WANRC3WUT";
+        "CAEO6TC2ZJD3CYHLY7ITVUNMNULWUDLO2WEJYZLVFO5INFEUPWDAUF7D";
       const contract = new Contract(contractAddress);
 
       const sourceAccount = await server.getAccount(caller);
