@@ -2,22 +2,12 @@ import React, { useState } from "react";
 import "./FlipOptions.css";
 import {
   getPublicKey,
-  signAuthEntry,
-  signBlob,
   signTransaction,
 } from "@stellar/freighter-api";
 
-import {
-  Contract,
-  Server,
-  TransactionBuilder,
-  Networks,
-  BASE_FEE,
-  Address,
-  nativeToScVal,
-  xdr,
-  SorobanRpc,
-} from "soroban-client";
+import * as StellarSdk from 'stellar-sdk';
+import { xdr } from "stellar-sdk";
+import { SorobanRpc } from "soroban-client";
 
 export const SendTxStatus: {
   [index: string]: SorobanRpc.SendTransactionStatus;
@@ -27,14 +17,15 @@ export const SendTxStatus: {
   Retry: "TRY_AGAIN_LATER",
   Error: "ERROR",
 };
+
 export const accountToScVal = (account: string) =>
-  new Address(account).toScVal();
+  new StellarSdk.Address(account).toScVal();
 
 export const numberToI128 = (value: number): xdr.ScVal =>
-  nativeToScVal(value * 10 ** 7, { type: "i128" });
+StellarSdk.nativeToScVal(value * 10 ** 7, { type: "i128" });
 
 export const StringToScVal = (value: string): xdr.ScVal =>
-  nativeToScVal(value, { type: "string" });
+StellarSdk.nativeToScVal(value, { type: "string" });
 
 function FlipOptions() {
   const [amount, setAmount] = useState(0);
@@ -47,17 +38,17 @@ function FlipOptions() {
     console.log(caller);
 
     if (selectedOption) {
-      const server = new Server("https://soroban-testnet.stellar.org", {
+      const server = new StellarSdk.SorobanRpc.Server("https://soroban-testnet.stellar.org", {
         allowHttp: true,
       });
       const contractAddress =
-        "CAEO6TC2ZJD3CYHLY7ITVUNMNULWUDLO2WEJYZLVFO5INFEUPWDAUF7D";
-      const contract = new Contract(contractAddress);
+        "CDZATF3FFNKCGH5L7U75JKWRWDK2YWJ3ZDOMOH4NHGDIPHN67QMMKFH3";
+      const contract = new StellarSdk.Contract(contractAddress);
 
       const sourceAccount = await server.getAccount(caller);
-      let builtTransaction = new TransactionBuilder(sourceAccount, {
-        fee: BASE_FEE,
-        networkPassphrase: Networks.TESTNET,
+      let builtTransaction = new StellarSdk.TransactionBuilder(sourceAccount, {
+        fee: StellarSdk.BASE_FEE,
+        networkPassphrase: StellarSdk.Networks.TESTNET,
       })
         .addOperation(
           contract.call(
@@ -73,18 +64,18 @@ function FlipOptions() {
 
       let _buildTransaction = await server.prepareTransaction(
         builtTransaction.build(),
-        Networks.TESTNET
+        // StellarSdk.Networks.TESTNET
       );
       let preparedTransaction = _buildTransaction.toXDR();
 
       try {
         const signedTx = await signTransaction(preparedTransaction, {
-          networkPassphrase: Networks.TESTNET,
+          networkPassphrase: StellarSdk.Networks.TESTNET,
           accountToSign: caller,
         });
         console.log(signedTx);
 
-        const tx = TransactionBuilder.fromXDR(signedTx, Networks.TESTNET);
+        const tx = StellarSdk.TransactionBuilder.fromXDR(signedTx, StellarSdk.Networks.TESTNET);
         const sendResponse = await server.sendTransaction(tx);
         console.log(sendResponse.status);
         if (sendResponse.errorResult) {
