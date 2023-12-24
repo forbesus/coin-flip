@@ -5,27 +5,24 @@ import {
   signTransaction,
 } from "@stellar/freighter-api";
 
-import * as StellarSdk from 'stellar-sdk';
-import { xdr } from "stellar-sdk";
-import { SorobanRpc } from "soroban-client";
-
-export const SendTxStatus: {
-  [index: string]: SorobanRpc.SendTransactionStatus;
-} = {
-  Pending: "PENDING",
-  Duplicate: "DUPLICATE",
-  Retry: "TRY_AGAIN_LATER",
-  Error: "ERROR",
-};
+import { 
+  nativeToScVal,
+  xdr,
+  Address,
+  Contract,
+  SorobanRpc,
+  TransactionBuilder,
+  Networks,
+  BASE_FEE } from "@stellar/stellar-sdk";
 
 export const accountToScVal = (account: string) =>
-  new StellarSdk.Address(account).toScVal();
+  new Address(account).toScVal();
 
 export const numberToI128 = (value: number): xdr.ScVal =>
-StellarSdk.nativeToScVal(value * 10 ** 7, { type: "i128" });
+nativeToScVal(value * 10 ** 7, { type: "i128" });
 
 export const StringToScVal = (value: string): xdr.ScVal =>
-StellarSdk.nativeToScVal(value, { type: "string" });
+nativeToScVal(value, { type: "string" });
 
 function FlipOptions() {
   const [amount, setAmount] = useState(0);
@@ -38,17 +35,17 @@ function FlipOptions() {
     console.log(caller);
 
     if (selectedOption) {
-      const server = new StellarSdk.SorobanRpc.Server("https://soroban-testnet.stellar.org", {
+      const server = new SorobanRpc.Server("https://soroban-testnet.stellar.org", {
         allowHttp: true,
       });
       const contractAddress =
         "CDZATF3FFNKCGH5L7U75JKWRWDK2YWJ3ZDOMOH4NHGDIPHN67QMMKFH3";
-      const contract = new StellarSdk.Contract(contractAddress);
+      const contract = new Contract(contractAddress);
 
       const sourceAccount = await server.getAccount(caller);
-      let builtTransaction = new StellarSdk.TransactionBuilder(sourceAccount, {
-        fee: StellarSdk.BASE_FEE,
-        networkPassphrase: StellarSdk.Networks.TESTNET,
+      let builtTransaction = new TransactionBuilder(sourceAccount, {
+        fee: BASE_FEE,
+        networkPassphrase: Networks.TESTNET,
       })
         .addOperation(
           contract.call(
@@ -70,24 +67,24 @@ function FlipOptions() {
 
       try {
         const signedTx = await signTransaction(preparedTransaction, {
-          networkPassphrase: StellarSdk.Networks.TESTNET,
+          networkPassphrase: Networks.TESTNET,
           accountToSign: caller,
         });
         console.log(signedTx);
 
-        const tx = StellarSdk.TransactionBuilder.fromXDR(signedTx, StellarSdk.Networks.TESTNET);
+        const tx = TransactionBuilder.fromXDR(signedTx, Networks.TESTNET);
         const sendResponse = await server.sendTransaction(tx);
         console.log(sendResponse.status);
         if (sendResponse.errorResult) {
           throw new Error("Unable to submit transaction");
         }
 
-        if (sendResponse.status === SendTxStatus.Pending) {
+        if (sendResponse.status === "PENDING") {
           let txResponse = await server.getTransaction(sendResponse.hash);
 
           // Poll this until the status is not "NOT_FOUND"
           while (
-            txResponse.status === SorobanRpc.GetTransactionStatus.NOT_FOUND
+            txResponse.status === "NOT_FOUND"
           ) {
             // See if the transaction is complete
             // eslint-disable-next-line no-await-in-loop
@@ -97,7 +94,7 @@ function FlipOptions() {
             await new Promise((resolve) => setTimeout(resolve, 1000));
           }
 
-          if (txResponse.status === SorobanRpc.GetTransactionStatus.SUCCESS) {
+          if (txResponse.status === "SUCCESS") {
             console.log(txResponse);
             
             // check return value from contract and show result in app
