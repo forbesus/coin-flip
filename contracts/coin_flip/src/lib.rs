@@ -159,13 +159,3 @@ impl CoinFlip {
         get_admin(env)
     }
 }
-
-soroban contract invoke \
-  --id CDZATF3FFNKCGH5L7U75JKWRWDK2YWJ3ZDOMOH4NHGDIPHN67QMMKFH3 \
-  --source alice \
-  --network testnet \
-  -- \
-  initialize \
-  --admin alice \
-  --native_coin_address CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC \
-  --amount 1000000000
