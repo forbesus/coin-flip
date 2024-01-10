@@ -32,7 +32,7 @@ The first step you have to do is install Rust. You can follow the steps to insta
 
 1. Clone the repository:
     ```shell
-    git clone https://github.com/simusud/coin-flip.git
+    git clone https://github.com/KittyKuromi/coin-flip.git
     ```
 2. Go to ```contracts/coin_flip```
 
@@ -125,7 +125,7 @@ Now if you win the toss you will receive the double the amount you flipped and i
 
 ### 1. Clone this repository:
    ```sh
-   git clone https://github.com/simusud/coin-flip.git
+   git clone https://github.com/KittyKuromi/coin-flip.git
    ```
 ### 2. Go to ```frontend/coin_flip```
 
